@@ -8,13 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JsonView implements View {
 
-    private final static Logger log = LoggerFactory.getLogger(JsonView.class);
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void render(final Map<String, ?> model,
@@ -24,10 +21,8 @@ public class JsonView implements View {
         response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        Object dataToWrite;
-
-        dataToWrite = extractData(model);
-        objectMapper.writeValue(response.getWriter(), dataToWrite);
+        final Object dataToWrite = extractData(model);
+        objectMapper.writeValue(response.getOutputStream(), dataToWrite);
     }
 
     private Object extractData(Map<String, ?> model) {
@@ -35,16 +30,13 @@ public class JsonView implements View {
             Object singleValue = model.values().iterator().next();
             return validateSingleValue(singleValue);
         }
-            return model;
+        return model;
     }
 
     private Object validateSingleValue(Object singleValue) {
-        Object dataToWrite;
         if (singleValue == null) {
-            dataToWrite = Collections.emptyMap();
-        } else {
-            dataToWrite = singleValue;
+            return Collections.emptyMap();
         }
-        return dataToWrite;
+        return singleValue;
     }
 }
